@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "VK Purify",
+    "description": "VK Purify"
+  },
+  "appDescription": {
+    "message": "Removes annoying posts from the feed in VK.com",
+    "description": "Removes annoying posts from the feed in VK.com"
+  }
+}
