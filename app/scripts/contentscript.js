@@ -7,8 +7,6 @@ var _settings;
 
 chrome.storage.sync.get('settings', function (storage){
     _settings = storage.settings;
-
-    clearAds();
 });
 
 chrome.runtime.onMessage.addListener(
@@ -17,16 +15,84 @@ chrome.runtime.onMessage.addListener(
             updateSettings(request.settings);
     });
 
-$('#feed_rows').on("DOMNodeInserted", function(event){
-    if (!_settings)
+var _feed = null;
+
+function observeBodyToFindFeed(){
+
+    var page_body = document.querySelector('#wrap3');
+
+    var observer = new MutationObserver(function(mutations){
+
+        var feedFound = false;
+
+        mutations.forEach(function(mutation) {
+            var feeds = $(mutation.target).find('#feed_rows');
+            if (feeds.length == 1
+                && $(feeds).find('.post').length > 0){
+                feedFound = true;
+            }
+        });
+
+        if (feedFound && _feed == null){
+            console.log("Found feed, starting ads tracking!");
+
+            _feed = document.querySelector('#feed_rows');
+
+            startFeedTracking();
+        } else {
+            _feed = null;
+
+            stopFeedTracking();
+        }
+    });
+
+// configuration of the observer:
+    var config = { childList: true};
+
+// pass in the target node, as well as the observer options
+    observer.observe(page_body, config);
+}
+
+var _feedObserver = null;;
+
+function observeFeed(){
+
+    var feed = document.querySelector('#feed_rows');
+
+    _feedObserver = new MutationObserver(function(mutations){
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length > 0){
+                for (var i = 0; i < mutation.addedNodes.length; i++){
+                    if ($(mutation.addedNodes[i]).hasClass('feed_row')){
+                        clearAd(mutation.addedNodes[i]);
+                    }
+                }
+            }
+        });
+    });
+
+// configuration of the observer:
+    var config = { childList: true, subtree : true};
+
+// pass in the target node, as well as the observer options
+    _feedObserver.observe(feed, config);
+}
+
+function stopFeedTracking(){
+    if (!_feedObserver)
         return;
 
-    var currentTarget = event.target;
+    _feedObserver.disconnect();
+    _feedObserver = null;
+}
 
-    if ($(event.target).hasClass('feed_row')){
-        clearAd(currentTarget);
-    }
-});
+function startFeedTracking(){
+
+    clearAds();
+
+    observeFeed();
+}
+
 
 function updateSettings(settings) {
     _settings = settings;
@@ -69,7 +135,7 @@ function clearAd(feedRowHtmlElement){
             $adv.toggle();
         });
 
-        if (!_settings.doShowAdvRemoved)
+        if (!_settings || !_settings.doShowAdvRemoved)
             $advSign.hide();
     }
 }
@@ -80,5 +146,8 @@ function clearAds(){
     });
 }
 
+observeBodyToFindFeed();
 
-
+if (document.querySelector('#feed_rows')){
+    startFeedTracking();
+}
