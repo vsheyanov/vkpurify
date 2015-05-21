@@ -26,7 +26,7 @@ function observeBodyToFindFeed(){
         var feedFound = false;
 
         mutations.forEach(function(mutation) {
-            var feeds = $(mutation.target).find('#feed_rows');
+            var feeds = $(mutation.target).find('#feed_wall');
             if (feeds.length == 1
                 && $(feeds).find('.post').length > 0){
                 feedFound = true;
@@ -36,7 +36,7 @@ function observeBodyToFindFeed(){
         if (feedFound && _feed == null){
             console.log("Found feed, starting ads tracking!");
 
-            _feed = document.querySelector('#feed_rows');
+            _feed = document.querySelector('#feed_wall');
 
             startFeedTracking();
         } else {
@@ -57,7 +57,7 @@ var _feedObserver = null;;
 
 function observeFeed(){
 
-    var feed = document.querySelector('#feed_rows');
+    var feed = document.querySelector('#feed_wall');
 
     _feedObserver = new MutationObserver(function(mutations){
         mutations.forEach(function(mutation) {
@@ -130,13 +130,13 @@ function clearAd(feedRowHtmlElement){
         var $adv = $(feedRowHtmlElement);
         $advSign.insertBefore($adv);
 
-        $adv.hide();
+        $adv.toggle();
         $advSign.click(function(){
             $adv.toggle();
         });
 
         if (!_settings || !_settings.doShowAdvRemoved)
-            $advSign.hide();
+            $advSign.toggle();
     }
 }
 
@@ -148,6 +148,6 @@ function clearAds(){
 
 observeBodyToFindFeed();
 
-if (document.querySelector('#feed_rows')){
+if (document.querySelector('#feed_wall')){
     startFeedTracking();
 }
