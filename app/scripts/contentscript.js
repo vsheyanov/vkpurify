@@ -1,7 +1,7 @@
 'use strict';
 
 var _classes    = ['ads_ads_news_wrap'];
-var _attributes = ['data-ads'];
+var _attributes = ['data-ads', 'data-ad-view', 'data-ad'];
 
 var _settings;
 
